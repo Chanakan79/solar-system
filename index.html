@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>กำเนิดระบบสุริยะ · แบบจำลอง 3 มิติ</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a16;--panel:#0f1730;--line:#26335c;--tx:#e9ecf5;--mu:#a3adc9;--sun:#ffb43b;--ice:#8fd8e6;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.65 Sarabun,"Noto Sans Thai",system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+h1{font:600 clamp(24px,4.5vw,38px)/1.25 Prompt,Sarabun,sans-serif;margin:0 0 4px}
+.sub{color:var(--mu);margin:0 0 18px}
+.stages{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px}
+.stages button{flex:0 0 auto;background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;cursor:pointer;text-align:left;line-height:1.3}
+.stages button small{display:block;color:var(--mu);font-size:12px}
+.stages button[aria-pressed=true]{border-color:var(--sun);background:#1c2142;box-shadow:0 0 0 1px var(--sun) inset}
+.stages button:focus-visible,.hot:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
+.scene{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#04070f}
+svg{display:block;width:100%;height:auto}
+.hot{cursor:pointer;outline:none}
+.hot:hover,.hot:focus-visible{filter:brightness(1.3)}
+.hot:hover .hz,.hot:focus-visible .hz{stroke:rgba(255,255,255,.4);stroke-width:1}
+.sel{filter:drop-shadow(0 0 7px #ffb43b)}
+.t{fill:var(--tx);font:600 13px Prompt,Sarabun,sans-serif;text-anchor:middle;pointer-events:none}
+.t2{fill:var(--mu);font:400 11px Sarabun,sans-serif;text-anchor:middle;pointer-events:none}
+.spin{animation:sp 70s linear infinite;transform-origin:0 0}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.tour{position:relative;height:min(66vh,580px);touch-action:none;cursor:grab;background:#000}.tour canvas{width:100%;height:100%;display:block}
+.lab{position:absolute;transform:translate(-50%,0);background:rgba(6,10,22,.6);color:var(--tx);border:1px solid var(--line);border-radius:999px;font:12px Sarabun,sans-serif;padding:1px 9px;cursor:pointer;white-space:nowrap}
+.tb{position:absolute;right:10px;top:10px;display:flex;gap:6px}.tb button{background:rgba(15,23,48,.85);color:var(--tx);border:1px solid var(--line);border-radius:8px;font:13px Sarabun,sans-serif;padding:4px 10px;cursor:pointer}
+.lab:focus-visible,.tb button:focus-visible{outline:2px solid var(--sun)}
+.sec{margin-top:44px}.sec>h2{font:600 clamp(22px,4vw,30px)/1.3 Prompt,Sarabun,sans-serif;margin:0 0 16px}
+small{display:block;color:var(--sun);font:600 15px Sarabun,sans-serif}
+.steps{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--line)}
+.steps li{position:relative;padding:0 0 26px 22px}.steps li::before{content:"";position:absolute;left:-27px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--sun)}
+.steps h3,.card h3{font:600 20px/1.35 Prompt,Sarabun,sans-serif;margin:0 0 6px}.steps p,.card p{max-width:70ch;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--ice);border-radius:14px;padding:18px 20px}
+.fl{margin:0 0 12px;display:grid;gap:6px;font-size:14px}.fl div{border-left:3px solid var(--line);padding-left:10px}
+.fl dt{color:var(--mu);font-size:12px}.fl dd{margin:0}
+.go{background:#1c2142;color:var(--tx);border:1px solid var(--sun);border-radius:8px;padding:6px 14px;font:inherit;font-size:14px;cursor:pointer}
+.go:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
+.hint{color:var(--mu);margin:-8px 0 14px}.grid.top{align-items:start}
+.card summary{cursor:pointer;font:600 20px/1.35 Prompt,Sarabun,sans-serif;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card summary::-webkit-details-marker{display:none}.card summary::after{content:"+";color:var(--sun);font-size:24px}.card[open] summary::after{content:"−"}
+.card summary:focus-visible{outline:2px solid var(--sun);outline-offset:4px}.card[open] summary{margin-bottom:10px}
+.cap{color:var(--mu);font-size:14px;margin:10px 2px 16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;min-height:210px}
+.panel h2{font:600 clamp(22px,4vw,30px)/1.3 Prompt,Sarabun,sans-serif;margin:0}
+.panel .en{color:var(--sun);margin:0 0 12px;font-weight:600}
+.panel p{max-width:70ch;margin:0 0 14px}
+.facts{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.facts li{border-left:3px solid var(--ice);padding:2px 0 2px 10px;font-size:15px}
+.facts b{display:block;color:var(--mu);font-weight:400;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<h1>กำเนิดระบบสุริยะและการแบ่งเขตบริวารรอบดวงอาทิตย์</h1>
+<p class="sub">แบบจำลอง 3 มิติของดวงอาทิตย์และดาวเคราะห์ทั้งแปด</p>
+<div class="scene" id="scene"></div>
+<p class="cap">ลากเพื่อหมุนมุมมอง เลื่อนล้อเมาส์หรือใช้สองนิ้วเพื่อซูม แตะดาวหรือป้ายชื่อเพื่อดูข้อมูล ขนาดและวงโคจรถูกย่อให้พอดีกับหน้าจอ</p>
+<section class="panel" id="panel" aria-live="polite" hidden></section>
+<div id="more"></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const G=(th,p,f)=>({th,en:"",p,f});
+const D=(th,type,p,a,c,sh,sz,co)=>G(th,p,[["ประเภท",type],["ระยะห่างจากดวงอาทิตย์",a],["สี",c],["รูปร่าง",sh],["ขนาด",sz],["องค์ประกอบ",co]]);
+const INFO={
+nebula:G("เนบิวลาสุริยะ","เมื่อประมาณ 4,600 ล้านปีก่อน กลุ่มฝุ่นและแก๊สเย็นขนาดมหึมา ซึ่งส่วนใหญ่เป็นไฮโดรเจนและฮีเลียม เริ่มยุบตัวลงด้วยแรงโน้มถ่วงของตัวเอง กลุ่มเมฆนี้คือเนบิวลาสุริยะ เป็นวัตถุดิบของดวงอาทิตย์และทุกสิ่งที่โคจรรอบมัน",[["องค์ประกอบ","ฝุ่นและแก๊ส"],["อายุ","ประมาณ 4,600 ล้านปีก่อน"],["ขั้นต่อไป","ยุบตัวและหมุนเร็วขึ้น"]]),
+collapse:G("เนบิวลาสุริยะหดตัว","ขณะหดตัว กลุ่มเมฆหมุนเร็วขึ้นและแบนลงเป็นจาน มวลเกือบทั้งหมดตกลงสู่ศูนย์กลางรวมเป็นดวงอาทิตย์ ส่วนสารที่เหลือโคจรอยู่รอบ ๆ เป็นจานแบน",[["ศูนย์กลาง","99.8% ของมวลรวมเป็นดวงอาทิตย์"],["ส่วนที่เหลือ","จานฝุ่นและแก๊ส"],["เหตุที่แบน","การหมุนทำให้เมฆแบนลง"]]),
+disk:G("จานกำเนิดดาวเคราะห์","สารที่ไม่ได้รวมอยู่ในดวงอาทิตย์ (ประมาณ 0.2%) กลายเป็นจานที่หมุนรอบดวงอาทิตย์ บริเวณใกล้ดวงอาทิตย์ร้อนจัด ส่วนบริเวณไกลออกไปเย็นมาก แต่ละบริเวณจึงมีสารต่างชนิดกันที่รวมตัวเป็นของแข็งได้ นี่คือเหตุผลที่ดาวเคราะห์แต่ละดวงต่างกัน",[["ใกล้ (ร้อน)","ของแข็งที่มีจุดหลอมเหลวสูง"],["ไกล (เย็น)","แก๊สและน้ำแข็ง จุดหลอมเหลวต่ำ"],["ผลลัพธ์","ดาวเคราะห์แยกชนิดตามระยะห่าง"]]),
+"disk-inner":G("วัตถุดาวเคราะห์ที่เป็นของแข็ง จุดหลอมเหลวสูง (ใกล้ดวงอาทิตย์)","บริเวณใกล้ดวงอาทิตย์ร้อนเกินกว่าที่แก๊สและน้ำแข็งจะรวมตัวได้ มีเพียงโลหะและหินที่มีจุดหลอมเหลวสูงเท่านั้นที่เป็นของแข็งได้ และมีสารปริมาณน้อย วัตถุที่เกิดขึ้นจึงมีขนาดเล็ก",[["สาร","โลหะและหิน"],["บริเวณ","ใกล้ดวงอาทิตย์"],["กลายเป็น","ดาวเคราะห์หินและแถบดาวเคราะห์น้อย"]]),
+"disk-mid":G("วัตถุดาวเคราะห์ที่เป็นแก๊ส จุดหลอมเหลวต่ำ (ไกลดวงอาทิตย์)","เลยแนวน้ำแข็ง (frost line) ออกไปเย็นพอที่น้ำแข็งจะแข็งตัวพร้อมกับหิน และมีสารให้รวมตัวมากกว่าเดิมมาก แกนของดาวเคราะห์จึงโตเร็วจนมีมวลมากพอที่จะดึงแก๊สเข้ามา",[["สาร","หิน น้ำแข็ง และแก๊ส"],["บริเวณ","ไกลดวงอาทิตย์"],["กลายเป็น","ดาวเคราะห์ยักษ์แก๊สและยักษ์น้ำแข็ง"]]),
+"disk-far":G("แถบไคเปอร์และดงดาวหาง (ไกลดวงอาทิตย์มาก)","ที่ขอบจานซึ่งหนาวเย็นและมีสารเบาบาง ไม่พอจะสร้างดาวเคราะห์ จึงเหลือเป็นวัตถุน้ำแข็งนับไม่ถ้วน คือแถบไคเปอร์ และไกลออกไปอีกเป็นกลุ่มดาวหางที่เรียกว่าเมฆออร์ต",[["สาร","น้ำแข็งและฝุ่น"],["บริเวณ","ไกลดวงอาทิตย์มาก"],["กลายเป็น","ดาวเคราะห์แคระและดาวหาง"]]),
+planetesimal:G("วัตถุดาวเคราะห์ก่อนเกิด","เม็ดฝุ่นเกาะติดกัน ก้อนฝุ่นชนและรวมกัน เติบโตจากก้อนกรวดเป็นวัตถุขนาดหลายกิโลเมตร แล้วเป็นดาวเคราะห์ก่อนเกิด บริเวณชั้นในและชั้นนอกเติบโตเป็นวัตถุคนละชนิด",[["กระบวนการ","เกาะติด ชน และรวมตัว"],["ขนาด","จากเม็ดฝุ่นถึงดาวเคราะห์ก่อนเกิด"],["แรงขับเคลื่อน","แรงโน้มถ่วง"]]),
+"pl-rock":G("ดาวเคราะห์หินก่อนเกิด","วัตถุหินใกล้ดวงอาทิตย์ชนและรวมกันเป็นดาวเคราะห์หินสี่ดวง ส่วนวัตถุใกล้ดาวพฤหัสบดีถูกแรงโน้มถ่วงอันแรงของดาวพฤหัสบดีรบกวนจนรวมกันไม่ได้ จึงคงเป็นเศษชิ้นเล็ก ๆ คือแถบดาวเคราะห์น้อย",[["กลายเป็น","ดาวพุธ ดาวศุกร์ โลก ดาวอังคาร"],["ส่วนที่เหลือ","แถบดาวเคราะห์น้อย"],["ถูกรบกวนโดย","แรงโน้มถ่วงของดาวพฤหัสบดี"]]),
+"pl-gas":G("ดาวเคราะห์ขนาดใหญ่ ส่วนใหญ่เป็นแก๊ส H, He","แกนของแข็งขนาดใหญ่ในบริเวณไกลดวงอาทิตย์มีแรงโน้มถ่วงมากพอจะดึงแก๊สไฮโดรเจนและฮีเลียมจำนวนมหาศาลเข้ามา เติบโตเป็นดาวเคราะห์ยักษ์แก๊ส",[["กลายเป็น","ดาวพฤหัสบดีและดาวเสาร์"],["ส่วนใหญ่เป็น","ไฮโดรเจนและฮีเลียม"],["แกน","ของแข็ง"]]),
+"pl-ice":G("ดาวเคราะห์ขนาดใหญ่ ส่วนใหญ่เป็นของเหลว","ไกลออกไปอีก แกนโตช้ากว่าและแก๊สเบาบางกว่า ดาวเคราะห์เหล่านี้จึงมีสารที่เป็นน้ำแข็งและของเหลวเป็นหลัก กลายเป็นดาวเคราะห์ยักษ์น้ำแข็ง",[["กลายเป็น","ดาวยูเรนัสและดาวเนปจูน"],["ส่วนใหญ่เป็น","น้ำ แอมโมเนีย และมีเทนที่เป็นน้ำแข็งและของเหลว"],["แกน","ของแข็ง"]]),
+system:G("ระบบสุริยะที่สมบูรณ์","หลังผ่านไปหลายสิบล้านปี จานก็ถูกกวาดรวมเป็นดาวเคราะห์ ดาวเคราะห์แบ่งเป็นเขตตามระยะห่างจากดวงอาทิตย์ ได้แก่ ดาวเคราะห์หิน แถบดาวเคราะห์น้อย ดาวเคราะห์ยักษ์แก๊ส ดาวเคราะห์ยักษ์น้ำแข็ง และแถบไคเปอร์",[["อายุ","ประมาณ 4,600 ล้านปี"],["เขต","5 เขต แบ่งตามระยะห่างและชนิดของสาร"],["หน่วย","1 AU = ระยะโลก–ดวงอาทิตย์"]]),
+"zone-rocky":G("เขตดาวเคราะห์หิน","ดาวเคราะห์ขนาดเล็กหนาแน่น มีพื้นผิวแข็งเป็นหินและโลหะ เกิดจากสารที่มีจุดหลอมเหลวสูงใกล้ดวงอาทิตย์",[["ดาวเคราะห์","ดาวพุธ ดาวศุกร์ โลก ดาวอังคาร"],["ช่วงระยะ","ประมาณ 0.4 – 1.5 AU"],["สาร","หินและโลหะ"]]),
+belt:G("แถบดาวเคราะห์น้อย","เศษหินนับล้านชิ้นระหว่างดาวอังคารกับดาวพฤหัสบดี แรงโน้มถ่วงของดาวพฤหัสบดีรบกวนสารเหล่านี้ไม่หยุด จึงไม่เคยรวมเป็นดาวเคราะห์ สมาชิกที่ใหญ่ที่สุดคือซีรีส ซึ่งเป็นดาวเคราะห์แคระ",[["ช่วงระยะ","ประมาณ 2.2 – 3.2 AU"],["สาร","หินและโลหะ"],["สาเหตุ","ถูกแรงโน้มถ่วงของดาวพฤหัสบดีรบกวน"]]),
+"zone-gas":G("เขตดาวเคราะห์ยักษ์แก๊ส","ดาวเคราะห์ขนาดมหึมาที่มีชั้นบรรยากาศไฮโดรเจนและฮีเลียมลึกห่อหุ้มแกนแข็ง เกิดในบริเวณเย็นที่มีสารมาก",[["ดาวเคราะห์","ดาวพฤหัสบดี ดาวเสาร์"],["ช่วงระยะ","ประมาณ 5 – 10 AU"],["สาร","ส่วนใหญ่เป็นแก๊ส H และ He"]]),
+"zone-ice":G("เขตดาวเคราะห์ยักษ์น้ำแข็ง","ดาวเคราะห์ขนาดใหญ่ที่ส่วนใหญ่เป็นน้ำ แอมโมเนีย และมีเทนที่เป็นน้ำแข็งและของเหลวรอบแกนแข็ง มีบรรยากาศไฮโดรเจน–ฮีเลียมปกคลุมด้านนอก",[["ดาวเคราะห์","ดาวยูเรนัส ดาวเนปจูน"],["ช่วงระยะ","ประมาณ 19 – 30 AU"],["สาร","น้ำแข็งและของเหลว"]]),
+kuiper:G("แถบไคเปอร์","วงแหวนกว้างของเศษน้ำแข็งนอกวงโคจรดาวเนปจูน เป็นที่อยู่ของดาวเคราะห์แคระอย่างดาวพลูโต ไกลออกไปอีกคือเมฆออร์ต (ดงดาวหาง) ต้นกำเนิดของดาวหางจำนวนมาก",[["ช่วงระยะ","ประมาณ 30 – 50 AU"],["สาร","น้ำแข็งและหิน"],["ตัวอย่าง","ดาวพลูโต ดาวหาง"]]),
+sun:D("ดวงอาทิตย์","ดาวฤกษ์ (ชนิด G2V)","ใจกลางเนบิวลาหนาแน่นและร้อนมากพอให้เกิดฟิวชันไฮโดรเจน ดวงอาทิตย์มีมวลเกือบทั้งหมดของระบบ และแรงโน้มถ่วงของมันยึดดาวเคราะห์ทุกดวงไว้ในวงโคจร","0 AU ศูนย์กลางระบบสุริยะ แสงใช้เวลาเฉลี่ยประมาณ 8 นาที 19 วินาทีมายังโลก (1 AU ≈ 149.6 ล้านกิโลเมตร)","สีขาวสว่างที่ชั้นโฟโตสเฟียร์ ดูเป็นสีเหลือง ส้ม หรือแดงเมื่ออยู่ใกล้ขอบฟ้า และโครโมสเฟียร์เป็นสีแดงอมชมพูในช่วงสุริยุปราคาเต็มดวง","เกือบเป็นทรงกลมสมบูรณ์ (ความแป้นประมาณ 9 × 10⁻⁶)","เส้นผ่านศูนย์กลางประมาณ 1,392,000 กม. (ราว 109 เท่าของโลก) · มวลประมาณ 1.989 × 10³⁰ กก. (ราว 333,000 เท่าของโลก) · ปริมาตรราว 1.3 ล้านเท่าของโลก · ความหนาแน่นเฉลี่ย 1.41 ก./ซม.³","พลาสมาและแก๊สร้อนจัด: ไฮโดรเจนประมาณ 73.5% และฮีเลียมประมาณ 24.9% โดยมวล ที่เหลือราว 1.6–2% เป็นออกซิเจน คาร์บอน เหล็ก นีออน ไนโตรเจน ซิลิคอน แมกนีเซียม กำมะถัน โครงสร้างประกอบด้วยแก่น ชั้นแผ่รังสี ชั้นการพา และบรรยากาศ (โฟโตสเฟียร์ โครโมสเฟียร์ โคโรนา)"),
+mercury:D("ดาวพุธ","ดาวเคราะห์หิน","พื้นผิวเต็มไปด้วยหลุมอุกกาบาต หน้าผาสูงชัน และที่ราบลาวาโบราณ แกนเหล็กมีขนาดใหญ่มากเมื่อเทียบกับตัวดาว","เฉลี่ยประมาณ 0.39 AU (57.9 ล้านกม.) · แสงใช้เวลาประมาณ 3.2 นาที","สีเทาเข้มถึงเทาอมน้ำตาล คล้ายดวงจันทร์","ทรงกลมแป้นเล็กน้อย มีหลุมอุกกาบาต หน้าผา และที่ราบลาวา","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 4,879 กม. · มวล ≈ 3.30 × 10²³ กก. (0.055 เท่าของโลก)","แกนเหล็ก-นิกเกิลขนาดใหญ่ (รัศมีราว 85% ของดาว และมวลเกือบ 70%) ห่อหุ้มด้วยเนื้อโลกและเปลือกซิลิเกตบาง แทบไม่มีบรรยากาศ (มีเพียงเอกโซสเฟียร์บางมาก)"),
+venus:D("ดาวศุกร์","ดาวเคราะห์หิน","เมฆหนาปกคลุมพื้นผิวที่มีภูเขาไฟ ที่สูง และที่ราบภูเขาไฟกว้างใหญ่","เฉลี่ยประมาณ 0.72 AU (108.2 ล้านกม.) · แสงใช้เวลาประมาณ 6.0 นาที","สีเหลืองครีมถึงขาวนวลจากเมฆกรดซัลฟิวริก (หินภูเขาไฟใต้เมฆเป็นสีน้ำตาลแดง)","เกือบเป็นทรงกลมสมบูรณ์ มีภูเขาไฟ ที่สูง และที่ราบภูเขาไฟ","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 12,104 กม. (≈ 0.95 เท่าของโลก) · มวล ≈ 4.87 × 10²⁴ กก. (0.815 เท่าของโลก)","แกนเหล็ก-นิกเกิล เนื้อโลกและเปลือกซิลิเกต บรรยากาศหนาแน่นประกอบด้วยคาร์บอนไดออกไซด์ ≈ 96.5% ไนโตรเจน ≈ 3.5% และเมฆกรดซัลฟิวริก"),
+earth:D("โลก","ดาวเคราะห์หิน","โลกเดียวที่รู้ว่ามีน้ำเหลวบนพื้นผิวและมีสิ่งมีชีวิต","1.00 AU (เฉลี่ย ≈ 149.6 ล้านกม.) · แสงใช้เวลาประมาณ 8 นาที 19 วินาที","น้ำเงิน ขาว เขียว และน้ำตาล (มหาสมุทรประมาณ 71% เมฆและน้ำแข็ง ทวีป และพืชพรรณ)","ทรงกลมแป้นเล็กน้อยที่ขั้ว (ทรงกลมรี) มีแผ่นเปลือกโลก ภูเขา หุบเขา และมหาสมุทร","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 12,756 กม. (ที่ขั้ว ≈ 12,714 กม.) · มวล ≈ 5.97 × 10²⁴ กก. · ความหนาแน่นเฉลี่ย ≈ 5.51 ก./ซม.³","แกนในเป็นเหล็กแข็ง แกนนอกเป็นเหล็ก-นิกเกิลเหลว เนื้อโลกซิลิเกต เปลือกโลก (ทวีปและมหาสมุทร) และบรรยากาศที่ประกอบด้วยไนโตรเจน ≈ 78% ออกซิเจน ≈ 21% อาร์กอน คาร์บอนไดออกไซด์ และไอน้ำ"),
+mars:D("ดาวอังคาร","ดาวเคราะห์หิน","ดาวทะเลทรายที่หนาวเย็น มีภูเขาไฟยักษ์ หุบเขาลึก และร่องรอยของแม่น้ำโบราณ","เฉลี่ยประมาณ 1.52 AU (228.0 ล้านกม.) · แสงใช้เวลาประมาณ 12.7 นาที","แดงส้มถึงน้ำตาลสนิม จากเหล็กออกไซด์ (สนิม) มีน้ำแข็งสีขาวที่ขั้วทั้งสอง","ทรงกลมแป้นเล็กน้อย มีภูเขาไฟขนาดใหญ่ หุบเขาลึก และหลุมอุกกาบาต","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 6,792 กม. (≈ 0.53 เท่าของโลก) · มวล ≈ 6.42 × 10²³ กก. (0.107 เท่าของโลก)","แกนเหล็ก นิกเกิล และกำมะถัน เนื้อโลกซิลิเกต เปลือกบะซอลต์ บรรยากาศบางมากประกอบด้วยคาร์บอนไดออกไซด์ ≈ 95% ไนโตรเจน และอาร์กอน"),
+jupiter:D("ดาวพฤหัสบดี","ดาวเคราะห์ยักษ์แก๊ส","ดาวเคราะห์ที่ใหญ่ที่สุด มีแถบเมฆและจุดแดงใหญ่ ไม่มีพื้นผิวแข็ง","เฉลี่ยประมาณ 5.20 AU (778.5 ล้านกม.) · แสงใช้เวลาประมาณ 43.3 นาที","แถบลายสีขาว ครีม ส้ม น้ำตาลแดง และเทาอมน้ำเงิน มีจุดแดงใหญ่ และวงแหวนจาง ๆ","ทรงกลมแป้นเห็นได้ชัด ขั้วแบนประมาณ 6.5% เพราะหมุนเร็ว (ประมาณ 9.9 ชั่วโมง) และไม่มีพื้นผิวแข็ง","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 142,984 กม. (≈ 11.2 เท่าของโลก) · มวล ≈ 1.90 × 10²⁷ กก. (≈ 318 เท่าของโลก)","ไฮโดรเจนประมาณ 89–90% และฮีเลียมประมาณ 10% โดยปริมาตร มีมีเทน แอมโมเนีย และไอน้ำ ชั้นลึกความดันสูงจนไฮโดรเจนกลายเป็นโลหะเหลว มีแกนหนาแน่นประกอบด้วยหิน น้ำแข็ง และธาตุหนัก"),
+saturn:D("ดาวเสาร์","ดาวเคราะห์ยักษ์แก๊ส","มีชื่อเสียงจากวงแหวนน้ำแข็งสว่างและเศษหิน","เฉลี่ยประมาณ 9.58 AU (1,428 ล้านกม.) · แสงใช้เวลาประมาณ 1.32 ชั่วโมง","เหลืองซีด ครีม และน้ำตาลทอง มีระบบวงแหวนน้ำแข็งและเศษหินขนาดใหญ่ชัดเจน","แป้นที่สุดในบรรดาดาวเคราะห์ทั้งแปด (≈ 9.8%) เพราะหมุนเร็ว (≈ 10.7 ชั่วโมง) และความหนาแน่นต่ำ","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 120,536 กม. (≈ 9.45 เท่าของโลก) · มวล ≈ 5.68 × 10²⁶ กก. (≈ 95 เท่าของโลก) · ความหนาแน่นเฉลี่ย ≈ 0.69 ก./ซม.³","ส่วนใหญ่เป็นไฮโดรเจนและฮีเลียม ภายในมีไฮโดรเจนโลหะเหลว และแกนของหิน น้ำแข็ง และโลหะ วงแหวนส่วนใหญ่เป็นน้ำแข็ง (>90%) ผสมฝุ่นและหิน"),
+uranus:D("ดาวยูเรนัส","ดาวเคราะห์ยักษ์น้ำแข็ง","เอียงแทบจะนอนตะแคง มีวงแหวนสีเข้มจาง ๆ หลายวง","เฉลี่ยประมาณ 19.2 AU (2,875 ล้านกม.) · แสงใช้เวลาประมาณ 2.66 ชั่วโมง","สีเขียวอมน้ำเงิน จากแก๊สมีเทนในบรรยากาศชั้นบน","ทรงกลมแป้นเล็กน้อย แกนเอียงเกือบ 98° มีวงแหวนสีเข้มจาง ๆ","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 51,118 กม. (≈ 4 เท่าของโลก) · มวล ≈ 8.68 × 10²⁵ กก. (≈ 14.5 เท่าของโลก)","ชั้นนอกเป็นไฮโดรเจน ฮีเลียม และมีเทน ชั้นกลางเป็นน้ำ แอมโมเนีย และมีเทนเหลวร้อนความดันสูง และแกนซิลิเกต-เหล็ก"),
+neptune:D("ดาวเนปจูน","ดาวเคราะห์ยักษ์น้ำแข็ง","ดาวเคราะห์ที่ไกลที่สุด มีลมความเร็วสูงมาก","เฉลี่ยประมาณ 30.1 AU (4,504 ล้านกม.) · แสงใช้เวลาประมาณ 4.16 ชั่วโมง","น้ำเงินเข้มถึงน้ำเงินสด มีแถบเมฆสีขาวบาง ๆ และวงแหวนจาง ๆ","ทรงกลมแป้นเล็กน้อย ลมแรงมาก","เส้นผ่านศูนย์กลางที่เส้นศูนย์สูตร ≈ 49,528 กม. (≈ 3.88 เท่าของโลก) · มวล ≈ 1.02 × 10²⁶ กก. (≈ 17.1 เท่าของโลก)","บรรยากาศไฮโดรเจนและฮีเลียม ชั้นน้ำ แอมโมเนีย และมีเทนเหลวร้อนหนาแน่น และแกนหิน-โลหะ")
+};
+function tour(){
+if(!window.THREE){$s.textContent="มุมมอง 3 มิติต้องใช้ WebGL และไลบรารี three.js ซึ่งโหลดไม่สำเร็จ";return}
+const T=THREE;
+$s.innerHTML='<div class="tour" id="tv"></div>';
+const box=document.getElementById("tv"),W=()=>box.clientWidth,H=()=>box.clientHeight;
+const ren=new T.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.setSize(W(),H());box.appendChild(ren.domElement);
+const sc=new T.Scene(),cam=new T.PerspectiveCamera(45,W()/H(),.1,5000);
+const hs=(i,j,k)=>{const n=Math.sin(i*127.1+j*311.7+k*74.7)*43758.5453;return n-Math.floor(n)};
+const sm=t=>t*t*(3-2*t),L1=(a,b,t)=>a+(b-a)*t;
+const n3=(x,y,z)=>{const i=Math.floor(x),j=Math.floor(y),k=Math.floor(z),u=sm(x-i),v=sm(y-j),w=sm(z-k);
+return L1(L1(L1(hs(i,j,k),hs(i+1,j,k),u),L1(hs(i,j+1,k),hs(i+1,j+1,k),u),v),L1(L1(hs(i,j,k+1),hs(i+1,j,k+1),u),L1(hs(i,j+1,k+1),hs(i+1,j+1,k+1),u),v),w)};
+const fb=(x,y,z,o=5)=>{let a=0,f=1,s=.5,t=0;for(let i=0;i<o;i++){a+=n3(x*f,y*f,z*f)*s;t+=s;f*=2;s*=.5}return a/t};
+const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+function tx(fn,w=512,h=256){const c=document.createElement("canvas");c.width=w;c.height=h;const g=c.getContext("2d"),d=g.createImageData(w,h);
+for(let py=0;py<h;py++){const lat=Math.PI/2-py/h*Math.PI,cl=Math.cos(lat),y=Math.sin(lat);
+for(let px=0;px<w;px++){const lo=px/w*6.2832,x=cl*Math.cos(lo),z=cl*Math.sin(lo),c3=fn(x,y,z,lat/1.5708,lo),q=(py*w+px)*4;d.data[q]=c3[0];d.data[q+1]=c3[1];d.data[q+2]=c3[2];d.data[q+3]=255}}
+g.putImageData(d,0,0);return new T.CanvasTexture(c)}
+const TX={
+sun:(x,y,z)=>mix([225,85,10],[255,228,125],Math.min(1,fb(x*9,y*9,z*9,5)*1.5)),
+mercury:(x,y,z)=>{const n=fb(x*5,y*5,z*5,6),c=n3(x*14,y*14,z*14),g=70+n*110-(c<.25?30:0);return[g,g*.95,g*.88]},
+venus:(x,y,z)=>mix([205,165,95],[247,232,190],fb(x*2+fb(x*3,y*3,z*3,3)*1.5,y*6,z*2,4)),
+earth:(x,y,z,la)=>{const h=fb(x*2.2+5,y*2.2,z*2.2,6);let c;
+if(h>.52){c=mix([50,110,55],[150,120,80],Math.min(1,Math.min(1,(h-.52)*5)*.8+Math.abs(la)*.3));if(Math.abs(la)<.35&&h>.6)c=mix(c,[190,160,100],.5)}else c=mix([8,30,95],[25,90,160],h/.52);
+if(Math.abs(la)>.85)c=mix(c,[245,248,255],Math.min(1,(Math.abs(la)-.85)*8));
+const cl=fb(x*3+9,y*5,z*3+2,5);if(cl>.5)c=mix(c,[255,255,255],Math.min(.9,(cl-.5)*4));return c},
+mars:(x,y,z,la)=>{let c=mix([120,55,28],[200,105,58],fb(x*3,y*3,z*3,6));if(Math.abs(la)>.9)c=mix(c,[245,245,250],.85);return c},
+jupiter:(x,y,z,la,lo)=>{const t=fb(x*2,y*9,z*2,4),b=Math.sin(la*16+t*3.5)*.5+.5,c=mix([165,105,70],[240,222,190],b);
+const dx=Math.atan2(Math.sin(lo-2.2),Math.cos(lo-2.2)),dy=la+.33;return mix(c,[190,70,45],Math.min(1,Math.exp(-(dx*dx/.05+dy*dy/.012))*1.4))},
+saturn:(x,y,z,la)=>{const t=fb(x*2,y*8,z*2,3),b=Math.sin(la*14+t*2)*.5+.5;return mix([190,160,105],[240,222,170],b*.8+.1)},
+uranus:(x,y,z,la)=>mix([120,205,208],[170,235,232],.5+la*.25+fb(x*2,y*4,z*2,3)*.2),
+neptune:(x,y,z,la)=>{const t=fb(x*2,y*8,z*2,4),b=Math.sin(la*10+t*3)*.5+.5;let c=mix([22,45,170],[70,115,235],b);if(fb(x*5+3,y*14,z*5,3)>.62)c=mix(c,[235,240,255],.5);return c}};
+// stars
+const sp=new Float32Array(9000);for(let i=0;i<3000;i++){const a=Math.random()*6.283,b=Math.acos(2*Math.random()-1);sp[i*3]=2500*Math.sin(b)*Math.cos(a);sp[i*3+1]=2500*Math.cos(b);sp[i*3+2]=2500*Math.sin(b)*Math.sin(a)}
+const sg=new T.BufferGeometry();sg.setAttribute("position",new T.BufferAttribute(sp,3));sc.add(new T.Points(sg,new T.PointsMaterial({color:0xffffff,size:1.5,sizeAttenuation:false})));
+// sun
+const gc=document.createElement("canvas");gc.width=gc.height=256;const gx=gc.getContext("2d"),gr=gx.createRadialGradient(128,128,0,128,128,128);
+gr.addColorStop(0,"rgba(255,240,200,1)");gr.addColorStop(.2,"rgba(255,180,70,.55)");gr.addColorStop(1,"rgba(255,120,20,0)");gx.fillStyle=gr;gx.fillRect(0,0,256,256);
+const glow=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(gc),blending:T.AdditiveBlending,depthWrite:false,transparent:true}));glow.scale.set(80,80,1);sc.add(glow);
+const sunM=new T.Mesh(new T.SphereGeometry(10,64,48),new T.MeshBasicMaterial({map:tx(TX.sun)}));sc.add(sunM);
+const sunB={id:"sun",r:10,g:sunM,ang:0};
+sc.add(new T.PointLight(0xfff1dd,1.6,0,0),new T.AmbientLight(0x202840,1));
+// planets: id, radius, orbit, flattening, axial tilt, spin
+const BD=[["mercury",.8,22,.998,0,.4],["venus",1.3,30,1,3.1,-.1],["earth",1.4,40,.997,.41,2],["mars",1,50,.995,.44,1.9],["jupiter",4.6,76,.935,.05,4.5],["saturn",3.9,103,.902,.47,4.2],["uranus",2.5,128,.977,1.71,-3],["neptune",2.4,150,.983,.49,3.2]];
+const Bs=BD.map((d,i)=>{const[id,r,a,f,tl,s]=d,g=new T.Group(),tg=new T.Group();
+const m=new T.Mesh(new T.SphereGeometry(r,64,48),new T.MeshStandardMaterial({map:tx(TX[id]),roughness:1,metalness:0}));m.scale.y=f;tg.rotation.z=tl;tg.add(m);g.add(tg);
+if(id=="earth"||id=="venus")g.add(new T.Mesh(new T.SphereGeometry(r*1.05,48,32),new T.MeshBasicMaterial({color:id=="earth"?0x6fb0ff:0xffe2a0,transparent:true,opacity:.16,side:T.BackSide,blending:T.AdditiveBlending,depthWrite:false})));
+if(id=="saturn"){const rc=document.createElement("canvas");rc.width=256;rc.height=4;const rx=rc.getContext("2d");
+for(let k=0;k<256;k++){const u=k/255,al=(u<.08?u/.08:1)*((u>.5&&u<.58)?.05:1)*(.55+.4*Math.sin(u*90)*Math.sin(u*37));rx.fillStyle="rgba("+((215-u*40)|0)+","+((190-u*40)|0)+","+((150-u*30)|0)+","+Math.max(0,al).toFixed(2)+")";rx.fillRect(k,0,1,4)}
+const ri=r*1.25,ro=r*2.35,rg=new T.RingGeometry(ri,ro,128,1),ps=rg.attributes.position,uv=rg.attributes.uv,v=new T.Vector3();
+for(let k=0;k<ps.count;k++){v.fromBufferAttribute(ps,k);uv.setXY(k,(v.length()-ri)/(ro-ri),.5)}
+const rm=new T.Mesh(rg,new T.MeshBasicMaterial({map:new T.CanvasTexture(rc),transparent:true,side:T.DoubleSide,depthWrite:false}));rm.rotation.x=-Math.PI/2;tg.add(rm)}
+let moon=null;if(id=="earth"){moon=new T.Mesh(new T.SphereGeometry(.38,32,24),new T.MeshStandardMaterial({map:tx(TX.mercury),roughness:1}));g.add(moon)}
+const pts=[];for(let k=0;k<=160;k++){const t=k/160*6.2832;pts.push(new T.Vector3(Math.cos(t)*a,0,Math.sin(t)*a))}
+sc.add(new T.Line(new T.BufferGeometry().setFromPoints(pts),new T.LineBasicMaterial({color:0x4a5c96,transparent:true,opacity:.45})));
+sc.add(g);return{id,r,a,g,m,s,w:.35*Math.pow(22/a,1.5),ang:i*.9+1,moon}});
+const ring=(n,a,b,hh,col,sz)=>{const p=new Float32Array(n*3);for(let i=0;i<n;i++){const t=Math.random()*6.283,r=a+Math.random()*(b-a);p[i*3]=Math.cos(t)*r;p[i*3+1]=(Math.random()-.5)*hh;p[i*3+2]=Math.sin(t)*r}
+const gm=new T.BufferGeometry();gm.setAttribute("position",new T.BufferAttribute(p,3));const o=new T.Points(gm,new T.PointsMaterial({color:col,size:sz,sizeAttenuation:false}));sc.add(o);return o};
+const belt=ring(2200,60,69,2.5,0xb8ae9c,1.6),kb=ring(2600,170,225,10,0xa9c4dc,1.3);
+// labels
+const labs=[["sun",()=>new T.Vector3(0,-11.5,0)],["belt",()=>new T.Vector3(64.5,0,0)],["kuiper",()=>new T.Vector3(197,0,0)]];
+Bs.forEach(b=>labs.push([b.id,()=>b.g.position.clone().add(new T.Vector3(0,-b.r-1.3,0))]));
+const els=labs.map(l=>{const e=document.createElement("button");e.className="lab";e.dataset.id=l[0];e.textContent=INFO[l[0]].th;e.onclick=()=>sel(l[0]);e.onpointerdown=ev=>ev.stopPropagation();box.appendChild(e);return e});
+box.insertAdjacentHTML("beforeend",'<div class="tb"><button id="b0">ภาพรวม</button><button id="b1">ความเร็ว ×1</button><button id="b2" aria-label="ซูมเข้า">+</button><button id="b3" aria-label="ซูมออก">−</button></div>');
+// camera state
+let focus=null,yaw=.6,pitch=.45,dist=420,dD=330,spd=1,raf,t0=performance.now();const tgt=new T.Vector3(),O=new T.Vector3();
+const zoom=v=>{dD=Math.max(focus?focus.r*2.3:30,Math.min(900,v))};
+function sel(id){const b=id=="sun"?sunB:Bs.find(x=>x.id==id);
+if(b){focus=b;dD=b.r*5.5;yaw=b.ang+Math.PI-.7;pitch=.25}else{focus=null;dD=id=="belt"?170:420;pitch=.7}
+show(id)}
+const SP=[[1,"ความเร็ว ×1"],[4,"ความเร็ว ×4"],[.25,"ความเร็ว ×¼"],[0,"หยุดชั่วคราว"]];let si=0;
+document.getElementById("b0").onclick=()=>{focus=null;dD=330;pitch=.45;hidePanel()};
+document.getElementById("b1").onclick=e=>{si=(si+1)%4;spd=SP[si][0];e.target.textContent=SP[si][1]};
+document.getElementById("b2").onclick=()=>zoom(dD*.8);document.getElementById("b3").onclick=()=>zoom(dD*1.25);
+const P2=new Map();let mv=0,ld=0;const ray=new T.Raycaster();
+box.onpointerdown=e=>{if(e.target!==ren.domElement)return;P2.set(e.pointerId,[e.clientX,e.clientY]);mv=0;ld=0;try{box.setPointerCapture(e.pointerId)}catch(_){}};
+box.onpointermove=e=>{const p=P2.get(e.pointerId);if(!p)return;const dx=e.clientX-p[0],dy=e.clientY-p[1];p[0]=e.clientX;p[1]=e.clientY;
+if(P2.size==1){yaw-=dx*.006;pitch=Math.max(-1.3,Math.min(1.4,pitch+dy*.005));mv+=Math.abs(dx)+Math.abs(dy)}
+else{const q=[...P2.values()],d=Math.hypot(q[0][0]-q[1][0],q[0][1]-q[1][1]);if(ld)zoom(dD*ld/d);ld=d;mv+=9}};
+box.onpointerup=box.onpointercancel=e=>{if(!P2.has(e.pointerId))return;P2.delete(e.pointerId);ld=0;
+if(mv<5&&e.type=="pointerup"){const r=ren.domElement.getBoundingClientRect();ray.setFromCamera(new T.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);
+const hit=ray.intersectObjects([sunM,...Bs.map(b=>b.m)])[0];if(hit){const b=Bs.find(x=>x.m===hit.object);sel(b?b.id:"sun")}}};
+box.addEventListener("wheel",e=>{e.preventDefault();zoom(dD*(e.deltaY>0?1.12:.89))},{passive:false});
+const rs=()=>{ren.setSize(W(),H());cam.aspect=W()/H();cam.updateProjectionMatrix()};addEventListener("resize",rs);
+function loop(){raf=requestAnimationFrame(loop);const now=performance.now(),dt=Math.min(.05,(now-t0)/1000)*spd;t0=now;
+Bs.forEach(b=>{const da=b.w*dt;b.ang+=da;b.g.position.set(Math.cos(b.ang)*b.a,0,Math.sin(b.ang)*b.a);b.m.rotation.y+=b.s*dt;if(b===focus)yaw+=da;
+if(b.moon){const t=b.ang*12;b.moon.position.set(Math.cos(t)*3.6,0,Math.sin(t)*3.6)}});
+sunM.rotation.y+=.02*dt;belt.rotation.y+=.012*dt;kb.rotation.y+=.003*dt;
+tgt.lerp(focus?focus.g.position:O,.12);dist+=(dD-dist)*.08;
+cam.position.set(tgt.x+Math.cos(yaw)*Math.cos(pitch)*dist,tgt.y+Math.sin(pitch)*dist,tgt.z+Math.sin(yaw)*Math.cos(pitch)*dist);cam.lookAt(tgt);
+labs.forEach((l,i)=>{const v=l[1]().project(cam),e=els[i];if(v.z>1){e.style.display="none";return}e.style.display="";e.style.left=((v.x*.5+.5)*W())+"px";e.style.top=((-v.y*.5+.5)*H()+4)+"px"});
+ren.render(sc,cam)}
+window.stopTour=()=>{window.tourSel=null;cancelAnimationFrame(raf);removeEventListener("resize",rs);ren.dispose()};
+window.tourSel=sel;loop()}
+const $s=document.getElementById("scene"),$p=document.getElementById("panel");
+function show(id){const d=INFO[id];if(!d)return;
+$p.hidden=false;
+$p.innerHTML=`<h2>${d.th}</h2><p>${d.p}</p><ul class="facts">${d.f.map(x=>`<li><b>${x[0]}</b>${x[1]}</li>`).join("")}</ul>`;
+document.querySelectorAll(".sel").forEach(e=>e.classList.remove("sel"));
+document.querySelectorAll(`.lab[data-id="${id}"]`).forEach(e=>e.classList.add("sel"))}
+window.hidePanel=()=>{$p.hidden=true;document.querySelectorAll(".sel").forEach(e=>e.classList.remove("sel"))};
+window.fly=id=>{if(window.tourSel){window.tourSel(id);$s.scrollIntoView({behavior:"smooth",block:"start"})}else show(id)};
+const fl=d=>`<dl class="fl">${d.f.map(x=>`<div><dt>${x[0]}</dt><dd>${x[1]}</dd></div>`).join("")}</dl>`;
+const btn=id=>`<button class="go" onclick="fly('${id}')">ดูในแบบจำลอง 3 มิติ</button>`;
+const SEQ=["nebula","collapse","disk","disk-inner","disk-mid","disk-far","planetesimal","pl-rock","pl-gas","pl-ice","system"];
+const ZN=[["zone-rocky","#ff8c3c"],["belt","#c8c8c8"],["zone-gas","#5a8cff"],["zone-ice","#78dce6"],["kuiper","#c8e6ff"]];
+const BODY=["sun","mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"];
+document.getElementById("more").innerHTML=
+`<section class="sec"><h2>การกำเนิดระบบสุริยะ</h2>
+<ol class="steps">${SEQ.map(id=>{const d=INFO[id];return `<li><h3>${d.th}</h3><p>${d.p}</p>${fl(d)}</li>`}).join("")}</ol></section>
+<section class="sec"><h2>การแบ่งเขตรอบดวงอาทิตย์</h2>
+<div class="grid">${ZN.map(z=>{const d=INFO[z[0]];return `<article class="card" style="border-top-color:${z[1]}"><h3>${d.th}</h3><p>${d.p}</p>${fl(d)}${btn(z[0])}</article>`}).join("")}</div></section>
+<section class="sec"><h2>ดวงอาทิตย์และดาวเคราะห์</h2><p class="hint">แตะที่ชื่อเพื่อดูรายละเอียดของแต่ละดวง</p>
+<div class="grid top">${BODY.map(id=>{const d=INFO[id];return `<details class="card"><summary>${d.th}</summary><p>${d.p}</p>${fl(d)}${btn(id)}</details>`}).join("")}</div></section>`;
+tour();
+</script>
+</body>
+</html>
